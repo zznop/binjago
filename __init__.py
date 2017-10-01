@@ -10,7 +10,8 @@ def find_uninitialized_var_refs(view):
     vuln_search.find_uninitialized_var_refs()
 
 def find_rop_gadgets(view):
-    raise NotImplementedError("ROP gadget finder has not been implemented, yet")
+    rop_search = ROPSearch(view)
+    rop_search.find_rop_gadgets()
         
 PluginCommand.register(
     "binjago: Find memory writes",

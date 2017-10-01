@@ -1,3 +1,7 @@
+"""Includes functionality for narrowing the search space and aiding in
+identifying vulnerable code
+"""
+
 from binaryninja import *
 from collections import OrderedDict
 
@@ -19,10 +23,13 @@ class VulnSearch(BackgroundTaskThread):
         for ref in self.view.get_code_refs(symbol.address):
             function = ref.function
             addr     = ref.address
-            print "{} - {:x}".format(symbol_name, addr)
+            comment = ""
             for name, position in params.iteritems():
-                print "  {}: {}".format(name, function.get_parameter_at(addr, None, position))
-            print "\n"
+                comment += "  {}: {}\n".format(name, function.get_parameter_at(addr, None, position))
+
+            print "{} - {:x}".format(symbol_name, addr)
+            print comment
+            function.set_comment(ref.address, comment)
 
     def find_memory_writes(self):
         """Search for memcpy and memcpy-like functions
@@ -36,7 +43,7 @@ class VulnSearch(BackgroundTaskThread):
         self._find_memory_write_func("strcat", OrderedDict([('dst', 0), ('src', 1)]))
         self._find_memory_write_func("vsprintf", OrderedDict([('dst', 0), ('src', 1), ('arg_list', 2)]))
 
-    def _check_instr_for_uninit_ref(self, instr):
+    def _check_instr_for_uninit_ref(self, func, instr):
         """Check instruction for uninitialized local variable reference
         """
         if instr.operation == MediumLevelILOperation.MLIL_VAR_SSA:
@@ -46,13 +53,16 @@ class VulnSearch(BackgroundTaskThread):
                     return
 
                 if instr.src.var.source_type == VariableSourceType.StackVariableSourceType:
-                    print "Uninitialized stack variable reference - {}".format(hex(instr.address))
+                    comment = "Uninitialized stack variable reference"
+                    func.set_comment(instr.address, comment)
                 else:
-                    print "Possibile uninitialized local variable reference - {}".format(hex(instr.address))
+                    comment = "Possible unitialized variable reference"
+                    func.set_comment(instr.address, comment)
+                print "{:x} - {}".format(instr.address, comment)
         else:
             for operand in instr.operands:
                 if isinstance(operand, MediumLevelILInstruction):
-                    self._check_instr_for_uninit_ref(operand)
+                    self._check_instr_for_uninit_ref(func, operand)
 
     def find_uninitialized_var_refs(self):
         """Locate locations where an uninitialized variable may get referenced
@@ -60,4 +70,4 @@ class VulnSearch(BackgroundTaskThread):
         for func in self.view.functions:
             for block in func.medium_level_il.ssa_form:
                 for instr in block:
-                    self._check_instr_for_uninit_ref(instr)
+                    self._check_instr_for_uninit_ref(func, instr)
