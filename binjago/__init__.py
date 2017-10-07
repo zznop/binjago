@@ -1,2 +1,2 @@
-from .vuln import *
+from .triage import *
 from .rop import *

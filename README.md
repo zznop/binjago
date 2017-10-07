@@ -1,10 +1,14 @@
 # binjago
+Author: **zznop**
 
-## Description
 binjago is a static analysis and exploit development framework in the form of a Binary Ninja plugin
 
-## Author
-zznop _zznop0x90@gmail.com_
+## Minimum Version
 
-## Credits
-Some of the techniques (re)used in binjago were taken from their original project/con talks. Credit for @quend and Trail of Bits for the unitialized variable and memcpy search logic.
+This plugin requires the following minimum version of Binary Ninja:
+
+ * release - 1.1.922
+
+## License
+
+This plugin is released under a [MIT](LICENSE) license.

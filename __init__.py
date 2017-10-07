@@ -1,28 +1,22 @@
 from binaryninja import *
 from binjago import *
 
-def find_memory_writes(view):
-    vuln_search = VulnSearch(view)
-    vuln_search.find_memory_writes()
+def find_memory_func_calls(view):
+    bt = BinTriage(view)
+    bt.find_memory_func_calls()
 
 def find_uninitialized_var_refs(view):
-    vuln_search = VulnSearch(view)
-    vuln_search.find_uninitialized_var_refs()
+    bt = BinTriage(view)
+    bt.find_uninitialized_var_refs()
 
 def find_rop_gadgets(view):
     rop_search = ROPSearch(view)
     rop_search.find_rop_gadgets()
         
 PluginCommand.register(
-    "binjago: Find memory writes",
+    "binjago: Find memory function calls",
     "Locate calls to *cpy and *printf functions",
-    find_memory_writes
-)
-
-PluginCommand.register(
-    "binjago: Find uninitialized var ref's",
-    "Locate addresses containing instructions that possibly reference unitialized local variables",
-    find_uninitialized_var_refs
+    find_memory_func_calls
 )
 
 PluginCommand.register(
