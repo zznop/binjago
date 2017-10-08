@@ -3,15 +3,11 @@ from binjago import *
 
 def find_memory_func_calls(view):
     bt = BinTriage(view)
-    bt.find_memory_func_calls()
-
-def find_uninitialized_var_refs(view):
-    bt = BinTriage(view)
-    bt.find_uninitialized_var_refs()
+    bt.start()
 
 def find_rop_gadgets(view):
     rop_search = ROPSearch(view)
-    rop_search.find_rop_gadgets()
+    rop_search.start()
         
 PluginCommand.register(
     "binjago: Find memory function calls",

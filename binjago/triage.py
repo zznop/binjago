@@ -1,4 +1,4 @@
-"""```traige.py``` Includes functionality for automating the discovery of 
+"""triage.py: Includes functionality for automating the discovery of 
 interesting segments of code in the current binary
 """
 
@@ -13,14 +13,16 @@ class BinTriage(BackgroundTaskThread):
         BackgroundTaskThread.__init__(self, "", True)
         self.view = view
         self.markdown = ""
-        self.progress = None
+        self.progress = "binjago: Triaging the binary..."
 
     def _find_memory_write_func(self, symbol_name, params):
+        """Iterate function symbol references and gather information on 
+        each function call
+        """
         symbols_to_process = []
         symbols = self.view.get_symbols()
         for symbol in symbols:
             name = symbol.name.replace("@IAT", "")
-            print name
             if len(name) < len(symbol_name):
                 continue
 
@@ -38,8 +40,10 @@ class BinTriage(BackgroundTaskThread):
                 md_entry = ""
                 comment = ""
                 for name, position in params.iteritems():
-                    md_entry += "  **{}**: ```{}```\n\n".format(name, function.get_parameter_at(addr, None, position))
-                    comment += "  {}: {}\n".format(name, function.get_parameter_at(addr, None, position))
+                    md_entry += "  **{}**: ```{}```\n\n".format(
+                        name, function.get_parameter_at(addr, None, position))
+                    comment += "  {}: {}\n".format(
+                        name, function.get_parameter_at(addr, None, position))
 
                 md += "### 0x{:x} - {}\n".format(addr, symbol.name)
                 md += md_entry
@@ -48,10 +52,9 @@ class BinTriage(BackgroundTaskThread):
         if md != "":
             self.markdown += md
 
-    def find_memory_func_calls(self):
-        """```find_memory_func_calls``` Search for calls to functions that manipulate chunks of memory
+    def run(self):
+        """Search for calls to functions that manipulate chunks of memory
         """
-        self.progress = "Searching for interesting function calls"
         self._find_memory_write_func("malloc", OrderedDict([('n', 0),]))
         self._find_memory_write_func("realloc", OrderedDict([('ptr', 0), ('n', 1)]))
         self._find_memory_write_func("memcpy", OrderedDict([('dst', 0), ('src',  1), ('n', 2)]))
@@ -67,8 +70,12 @@ class BinTriage(BackgroundTaskThread):
         self._find_memory_write_func("fwrite", OrderedDict([('ptr', 0), ('n', 1), ('count',  2), ('stream',  3)]))
         self._find_memory_write_func("fread", OrderedDict([('ptr', 0), ('n', 1), ('count',  2), ('stream',  3)]))
 
-
         if self.markdown != "":
             self.view.show_markdown_report("Memory Function References", self.markdown)
         else:
-            show_message_box("binjago: Memory Function Search", "Could not find any memory function symbol references")
+            show_message_box(
+                "binjago: Memory Function Search", 
+                "Could not find any memory function symbol references"
+            )
+
+        self.progress = ""
