@@ -14,16 +14,33 @@ class ROPSearch(BackgroundTaskThread):
         self.gadgets = {}
         self.progress = None
 
-    def _calculate_instrs_from_ret(self, baseaddr, ret_addr):
+    def _disas_all_instrs(self, start_addr, ret_addr):
+        instructions = []
+        curr_addr = start_addr
+        while curr_addr < ret_addr:
+            instr = self.view.get_disassembly(curr_addr)
+            instructions.append(instr)
+            curr_addr += self.view.get_instruction_length(curr_addr)
+
+        # ret opcode was included in last instruction - bad gadget
+        if curr_addr != ret_addr:
+            return None
+
+        return instructions
+
+    def _calculate_gadget_from_ret(self, baseaddr, ret_addr):
         ret_instr = self.view.get_disassembly(ret_addr)
-        i = 1
-        while (i < self.MAX_INSTR_SIZE):
-            instr = self.view.get_disassembly(ret_addr - i)
-            instr_size = self.view.get_instruction_length(ret_addr - i)
-            if instr_size == i:
-                gadget_rva = ret_addr - i - int(baseaddr)
-                self.gadgets[gadget_rva] = "{} ; {}".format(instr, ret_instr)
-            i = i + 1
+        for i in range(1, self.MAX_INSTR_SIZE):
+            instructions = self._disas_all_instrs(ret_addr - i, ret_addr)
+            if instructions == None:
+                continue 
+
+            gadget_str = ""
+            for instr in instructions:
+                gadget_str += "{} ;".format(instr)
+
+            gadget_rva = ret_addr - i - baseaddr
+            self.gadgets[gadget_rva] = "{} {}".format(gadget_str, ret_instr)
 
     def _find_gadgets_in_data(self, baseaddr, section):
         rets = [
@@ -32,7 +49,6 @@ class ROPSearch(BackgroundTaskThread):
             "\xf2\xc3",               # ret
         ]
 
-        self.progress = "Searching for ROP gadgets"
         for ret in rets:
             next_start = section.start
             next_ret_addr = 0
@@ -40,7 +56,7 @@ class ROPSearch(BackgroundTaskThread):
                 next_ret_addr = self.view.find_next_data(next_start, ret)
                 if next_ret_addr == None:
                     break
-                self._calculate_instrs_from_ret(baseaddr, next_ret_addr)
+                self._calculate_gadget_from_ret(baseaddr, next_ret_addr)
                 next_start = next_ret_addr + len(ret)
     
     def _generate_markdown_report(self, title):
@@ -57,12 +73,13 @@ class ROPSearch(BackgroundTaskThread):
         """```find_rop_gadgets``` Locate ROP gadgets in a binary
         """
         if not self.view.executable:
-            print "! binary is not executable"
             return
 
         baseaddr = self.view.segments[0].start
         section  = self.view.get_section_by_name(".text")
+        self.progress = "Searching for ROP gadgets"
         gadgets  = self._find_gadgets_in_data(baseaddr, section)
+        self.progress = None
         if self.gadgets != {}:
             self._generate_markdown_report("ROP Gadgets")
         else:
