@@ -9,7 +9,6 @@ class PrologSearch(BackgroundTaskThread):
     def __init__(self, view):
         BackgroundTaskThread.__init__(self, "", True)
         self.view = view
-        self.markdown = ""
         self.signatures = {
             'Intel x86 function prologue' : ["\x55\x89\xE5\x83\xEC", "\x55\x89\xE5\x57\x56"],
             'Intel x86 NOP Instructions' : ["\x90\x90\x90\x90\x90\x90\x90\x90",],
@@ -43,10 +42,26 @@ class PrologSearch(BackgroundTaskThread):
             chunk = chunk[self.max_sig_size:] + new_chunk
             startaddr += len(chunk) + self.max_sig_size
 
+    def _display_report(self):
+        """Generate and display the markdown report
+        """
+        md = ""
+        for key, val in self.hits.iteritems():
+            md += "**{:08x}** {}\n\n".format(key, val)
+
+        self.view.show_markdown_report("Function Prologue Search", md)
 
     def run(self):
         """Locate prologues containined in binary
         """
         self._search_for_func_prologues()
         print self.hits
+        if self.hits != {}:
+            self._display_report()
+        else:
+            show_message_box(
+                "binjago: Function Prologue Search", 
+                "Could not find any function prologues"
+            )
+
 

@@ -98,7 +98,7 @@ class ROPSearch(BackgroundTaskThread):
         found = []
         for addr, gadget in sorted(self.gadgets.items(), key=itemgetter(1)):
             if gadget not in found:
-                markdown += "**0x{:x}** ```{}```\n\n".format(addr, gadget)
+                markdown += "**{:08x}** ```{}```\n\n".format(addr, gadget)
                 found.append(gadget)
 
         self.view.show_markdown_report(title, markdown)

@@ -45,7 +45,7 @@ class StdCallSearch(BackgroundTaskThread):
                     comment += "  {}: {}\n".format(
                         name, function.get_parameter_at(addr, None, position))
 
-                md += "### 0x{:x} - {}\n".format(addr, symbol.name)
+                md += "### {:08x} - {}\n".format(addr, symbol.name)
                 md += md_entry
                 function.set_comment(ref.address, comment)
 
