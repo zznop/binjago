@@ -74,6 +74,7 @@ class StdCallSearch(BackgroundTaskThread):
         self._find_func_symbol_refs("strncmp", OrderedDict([('str1', 0), ('str2', 1), ('num', 2)]))
         self._find_func_symbol_refs("fgets", OrderedDict([('str', 0), ('num', 1), ('stream', 2)]))
         self._find_func_symbol_refs("strlen", OrderedDict([('str', 0)]))
+        self._find_func_symbol_refs("mprotect", OrderedDict([('addr', 0), ('len', 1), ('prot', 2)]))
 
         if self.markdown != "":
             self.view.show_markdown_report("Standard Function Search", self.markdown)

@@ -12,35 +12,26 @@ class PrologSearch(BackgroundTaskThread):
         self.signatures = {
             'Intel x86 function prologue' : ["\x55\x89\xE5\x83\xEC", "\x55\x89\xE5\x57\x56"],
             'Intel x86 NOP Instructions' : ["\x90\x90\x90\x90\x90\x90\x90\x90",],
+            'ARM big-endian function prologue' : ["\xe9\x2d",],
+            'ARM little-endian function prologue' : ["\x2d\xe9"],
         }
         self.max_sig_size = -8
         self.hits = {}
-
-    def _search_chunk(self, startaddr, chunk):
-        """Search chunk for signature
-        """
-        for key, values in self.signatures.iteritems():
-            for signature in values:
-                m = chunk.find(signature)
-                if m >= 0:
-                    self.hits[startaddr + m] = key
 
     def _search_for_func_prologues(self):
         """Iterate data a page at a time using BinaryReader and search for
         function prologue signatures
         """
-        br = BinaryReader(self.view, Endianness.BigEndian)
-        chunk = br.read(4096)
-        startaddr = 0
-        while True:
-            self._search_chunk(startaddr, chunk)
+        for desc, sigs in self.signatures.iteritems():
+            for sig in sigs:
+                nextaddr = 0
+                while True:
+                    nextaddr = self.view.find_next_data(nextaddr, sig)
+                    if nextaddr == None:
+                        break
 
-            new_chunk = br.read(4096)
-            if new_chunk == None:
-                break
-
-            chunk = chunk[self.max_sig_size:] + new_chunk
-            startaddr += len(chunk) + self.max_sig_size
+                    self.hits[nextaddr] = desc
+                    nextaddr = nextaddr + len(sig)
 
     def _display_report(self):
         """Generate and display the markdown report
@@ -55,7 +46,6 @@ class PrologSearch(BackgroundTaskThread):
         """Locate prologues containined in binary
         """
         self._search_for_func_prologues()
-        print self.hits
         if self.hits != {}:
             self._display_report()
         else:
