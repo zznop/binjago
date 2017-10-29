@@ -17,6 +17,7 @@ class RecursionSearch(BackgroundTaskThread):
     def _check_callee_callback(self):
         """Check if any of the destination functions callback to a caller function
         """
+        found = []
         for caller_func, entries in self.call_dests.iteritems():
             for entry in entries:
                 if not self.call_dests.has_key(entry['callee']):
@@ -24,18 +25,45 @@ class RecursionSearch(BackgroundTaskThread):
 
                 for entry2 in self.call_dests[entry['callee']]:
                     if caller_func == entry2['callee']:
-                        # add comments
-                        func = self.view.get_function_at(caller_func)
-                        func.set_comment(caller_func, "This function contains recursion (calls {})".format(self.view.get_symbol_at(entry['callee']).name))
-                        func.set_comment(entry['caller'], "This instruction is part of recursive logic")
 
-                        # craft markdown entry
-                        self.markdown += "### {:08x} - {}\n\n".format(
-                            caller_func, self.view.get_symbol_at(caller_func).name)
-                        self.markdown += "**{:08x}**: ```{} (caller)```\n\n".format(
+                        # if we've already reported this, don't report again
+                        if entry['caller'] in found:
+                            continue
+
+                        # append to found list
+                        found.append(entry['caller'])
+
+                        # add function header comment
+                        func = self.view.get_function_at(caller_func)
+                        callee_symbol = self.view.get_symbol_at(entry['callee'])
+
+                        # direct or indirect recursion?
+                        direct_indirect = "direct"
+                        if entry2['callee'] != caller_func:
+                            direct_indirect = "indirect"
+
+                        # set function header comment
+                        if callee_symbol:
+                            func.set_comment(caller_func, "Contains {} recursion (calls {})".format(direct_indirect, callee_symbol.name))
+                        else:
+                            func.set_comment(caller_func, "Contains {} recursion (calls {:08x})".format(direct_indirect, entry['callee']))
+
+                        # add instruction comment
+                        func.set_comment(entry['caller'], "Recursive call")
+
+                        # craft markdown header
+                        caller_func_symbol = self.view.get_symbol_at(caller_func)
+                        if caller_func_symbol:
+                            self.markdown += "### {:08x} - {}\n\n".format(caller_func, caller_func_symbol.name)
+                        else:
+                            self.markdown += "### {:08x}\n\n".format(caller_func)
+
+                        # craft markdown type
+                        self.markdown += "**type**: {}\n\n".format(direct_indirect)
+                        
+                        # craft markdown caller instruction
+                        self.markdown += "**{:08x}**: ```{}```\n\n".format(
                             entry['caller'], self.view.get_disassembly(entry['caller']))
-                        self.markdown += "**{:08x}**: ```{} (callee)```\n\n\n".format(
-                            entry['callee'], self.view.get_symbol_at(entry['callee']).name) 
 
     def _enum_call_dests(self):
         """Iterate instructions, find calls, and populate call_dests dictionary
