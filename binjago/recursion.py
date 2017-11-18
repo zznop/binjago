@@ -39,7 +39,7 @@ class RecursionSearch(BackgroundTaskThread):
 
                         # direct or indirect recursion?
                         direct_indirect = "direct"
-                        if entry['callee'] != entry2['callee']:
+                        if entry['callee'] != caller_func:
                             direct_indirect = "indirect"
 
                         # set function header comment
