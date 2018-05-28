@@ -75,6 +75,8 @@ class StdCallSearch(BackgroundTaskThread):
         self._find_func_symbol_refs("fgets", OrderedDict([('str', 0), ('num', 1), ('stream', 2)]))
         self._find_func_symbol_refs("strlen", OrderedDict([('str', 0)]))
         self._find_func_symbol_refs("mprotect", OrderedDict([('addr', 0), ('len', 1), ('prot', 2)]))
+        self._find_func_symbol_refs("mmap", OrderedDict([('addr', 0), ('len', 1), ('prot', 2), ('flags', 3), ('fd', 4), ('offset', 5)]))
+        self._find_func_symbol_refs("munmap", OrderedDict([('addr', 0), ('len', 1)]))
 
         if self.markdown != "":
             self.view.show_markdown_report("Standard Function Search", self.markdown)
