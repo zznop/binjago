@@ -53,5 +53,3 @@ class PrologSearch(BackgroundTaskThread):
                 "binjago: Function Prologue Search", 
                 "Could not find any function prologues"
             )
-
-

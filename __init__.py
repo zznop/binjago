@@ -13,10 +13,6 @@ def find_prologues(view):
     sig_search = PrologSearch(view)
     sig_search.start()
 
-def find_recursion(view):
-    rec_search = RecursionSearch(view)
-    rec_search.start()
-        
 PluginCommand.register(
     "binjago: Find standard function references",
     "Locate and annotate symbol references for standard API calls",
@@ -33,10 +29,4 @@ PluginCommand.register(
     "binjago: Find function prologues",
     "Search binary files for function prologues",
     find_prologues
-)
-
-PluginCommand.register(
-    "binjago: Find recursive logic",
-    "Search for recursive logic",
-    find_recursion
 )
