@@ -86,7 +86,7 @@ def _find_gadgets_in_data(bv, baseaddr, section):
         for bytecode in bytecodes:
             next_start = section.start
             next_ret_addr = 0
-            while next_start < section.start + section.length:
+            while next_start < section.end:
                 next_ret_addr = bv.find_next_data(next_start, bytecode)
                 if next_ret_addr == None:
                     break
