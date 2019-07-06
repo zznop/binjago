@@ -1,18 +1,19 @@
 {
-    "plugin": {
-        "name": "binjago",
-        "type": ["binaryview"],
-        "api": "python2",
-        "description": "Binjago static analysis plugin suite.",
-        "longdescription": "A suite of Binary Ninja plugins that aid in static analysis and exploitation",
-        "license": {
+    "pluginmetadataversion": 1,
+    "name": "binjago",
+    "type": ["helper" ],
+    "api": ["python2"],
+    "description": "x86 ROP gadget calculation, libc call annotations, and prologue signature searching",
+    "longdescription": "Binjago is a random subset of helper plugins for annotating libc calls, calculating x86 ROP gadgets, and finding function prologue signatures in flat files",
+    "license": {
             "name": "MIT",
             "text": "Copyright (c) 2017 zznop\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
-        },
-        "version": "1.0",
-        "author": "zznop",
-        "minimumBinaryNinjaVersion": {
-            "release": "1.1.922"
-        }
-    }
+
+    },
+    "platforms": ["Linux"],
+    "dependencies": {
+    },
+    "version": "1.0",
+    "author": "zznop",
+    "minimumbinaryninjaversion": 0
 }
